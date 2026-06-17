@@ -1,5 +1,5 @@
 ---
-name: ifs-docs-research
+name: ifs-online-doc-research
 description: Use when searching or researching official IFS online documentation on docs.ifs.com, especially via indexed search because direct docs.ifs.com fetches are blocked.
 ---
 
