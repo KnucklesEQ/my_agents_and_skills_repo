@@ -1,49 +1,36 @@
 ---
 name: ifs-codebase-structure
-description: Use when working with local IFS Core source folders under Core_Files to understand the stable codebase structure, version roots, checkout roots, modules, Marble model files, PL/SQL database files, projection implementation areas, workflows, reports, lobby assets, and secondary source areas.
+description: "Use for initial navigation of local IFS Core code under Core_Files, to understand the recurring folder structure without remapping the whole tree: version folders, checkout roots, modules, model/source/server areas, and common artifact locations."
 ---
 
 # IFS Codebase Structure
 
-Use this skill as the baseline structural map for local IFS Core source code.
+## Purpose
 
-The goal is to avoid repeatedly remapping the same folder structure at the start of each session. Treat this as structural context only. It does not replace inspecting concrete files when a specific implementation question requires evidence.
+Use this skill as a reusable folder-structure map for local IFS Core code under `Core_Files/`.
 
-Do not perform broad recursive scans just to rediscover this structure. Use this skill as the known baseline, and inspect only the concrete paths needed for the user's current request.
+Its purpose is to avoid remapping the recurring folder layout at the start of each session. It describes where things usually live, not how IFS behavior, Marble syntax, PL/SQL conventions, projections, or product semantics work.
 
-Do not use this skill for official online IFS documentation research. This skill describes local Core folder structure only.
+Do not perform broad recursive scans just to rediscover the structure described here. Inspect concrete files only when the user's request requires evidence.
 
 ## Scope
 
-The relevant local source area is:
+The source root covered by this skill is relative to the current workspace:
 
 ```text
 Core_Files/
 ```
 
-The code under this folder is IFS Core layer code. Other IFS layers are outside the scope of this skill unless the user explicitly provides them.
+This skill covers local IFS Core layer code only. Other IFS layers (Base, Customization, Configuration) are outside its scope.
 
-## Root Layout
+## Version Roots
 
-Local IFS Core code is expected under:
-
-```text
-Core_Files/
-```
-
-Inside `Core_Files/`, one or more version folders may exist:
+Version folders live directly under `Core_Files/` and use this format:
 
 ```text
-Core_Files/<version>/
+Core_Files/<major>.<minor>.<patch>/
+Core_Files/<major>.<minor>.<patch>/checkout/
 ```
-
-Each version folder is expected to contain a fixed `checkout/` folder:
-
-```text
-Core_Files/<version>/checkout/
-```
-
-The `checkout/` folder is the functional root of the IFS Core code.
 
 Examples:
 
@@ -52,62 +39,34 @@ Core_Files/24.2.13/checkout/
 Core_Files/25.1.3/checkout/
 ```
 
-## Root Normalization
+`checkout/` is the functional root of an IFS Core version.
 
-If the user provides `Core_Files/`, inspect only the immediate children to identify version folders.
+Root handling:
 
-If exactly one version folder exists, use:
-
-```text
-Core_Files/<version>/checkout/
-```
-
-If multiple version folders exist, ask the user which version to use.
-
-If the user provides `Core_Files/<version>/`, use:
-
-```text
-Core_Files/<version>/checkout/
-```
-
-If the user provides `Core_Files/<version>/checkout/`, treat it directly as the functional root.
-
-If no `checkout/` folder exists under the selected version, say so and ask for clarification.
+- `Core_Files/`: inspect only immediate children to identify version folders.
+- One version: use `Core_Files/<version>/checkout/`.
+- Multiple versions: do not choose automatically; ask if one version is needed. Some tasks may compare versions.
+- `Core_Files/<version>/`: use `Core_Files/<version>/checkout/`.
+- `Core_Files/<version>/checkout/`: treat directly as the functional root.
+- Missing `checkout/`: say so and ask for clarification.
 
 ## Functional Root
 
-The functional root contains module folders and a small number of repository-level files.
-
-Pattern:
+The functional root contains module folders plus a small number of repository-level files.
 
 ```text
 Core_Files/<version>/checkout/<module>/
 ```
 
-Representative modules:
+Example module folders include `fndbas/`, `appsrv/`, `enterp/`, `invent/`, `order/`, `proj/`, `purch/`, `discom/`, `shpmnt/`, `payled/`, `genled/`, `wo/`, `person/`, and `docman/`.
 
-```text
-fndbas/
-appsrv/
-enterp/
-invent/
-order/
-proj/
-purch/
-discom/
-shpmnt/
-payled/
-genled/
-wo/
-person/
-docman/
-```
+This is not a complete module inventory. Available modules must be checked in the selected version's `checkout/` folder.
 
-Module names are structural identifiers. Do not rely on module names alone as proof of behavior.
+Module names are structural identifiers, not behavior evidence.
 
-## Common Module Layout
+## Module Layout
 
-Most functional modules use this pattern:
+Most functional modules use this layout:
 
 ```text
 <module>/
@@ -119,26 +78,18 @@ Most functional modules use this pattern:
 └── test/
 ```
 
-Not every module has every folder. Some modules may omit `test/`, `server/`, or other optional areas.
-
-The repeated module-name pattern is expected:
+Not every module has every folder. The repeated module-name pattern is expected:
 
 ```text
 <module>/model/<module>/
-<module>/source/<module>/...
+<module>/source/<module>/
 ```
 
-## FNDBAS
+## Special Module: fndbas
 
-`fndbas` is a special foundational module.
+`fndbas` is a special foundational module and should not be used as the representative example for normal business-module structure.
 
-The name is commonly explained as a contraction of "Framework Based Functionality" or "IFS Base Functionality".
-
-It contains broad framework/base functionality used throughout IFS. All IFS components make extensive use of `fndbas` and have it as a static dependency.
-
-Do not treat `fndbas` as a normal representative business module when inferring common module structure or implementation patterns.
-
-Observed `fndbas` layout can include extra framework, build, install, and template areas:
+Observed `fndbas` layout can include extra framework, build, install, and template folders:
 
 ```text
 fndbas/
@@ -155,88 +106,71 @@ fndbas/
 └── test/
 ```
 
-When investigating `fndbas` specifically, it still has its own primary paths such as `fndbas/model/fndbas/` and `fndbas/source/fndbas/...`.
+It still has primary paths such as `fndbas/model/fndbas/` and `fndbas/source/fndbas/`.
 
-## Marble And IFS Model Files
+## Model Area
 
-Primary model path:
+Primary path:
 
 ```text
 <module>/model/<module>/
 ```
 
-This is the main location for Marble and IFS model artifacts.
+Primary area for Marble and IFS model artifacts.
 
-Common extensions:
+Common extensions: `.entity`, `.client`, `.projection`, `.fragment`, `.utility`, `.enumeration`, `.overview`, `.report`, `.dimension`, `.filter`.
 
-```text
-.entity
-.client
-.projection
-.fragment
-.utility
-.enumeration
-.overview
-.report
-.dimension
-.filter
-```
-
-Operational report definitions can appear as model artifacts, for example with `.report` files.
-
-Representative examples:
+Example paths, not required file pairs:
 
 ```text
 order/model/order/CustomerOrderHandling.projection
-order/model/order/CustomerOrder.client
 order/model/order/CustomerOrder.entity
-order/model/order/CanBeFinalized.filter
 ```
 
-## PL/SQL And Database Logic
+## Source Areas
 
-Primary database path:
+Primary path:
+
+```text
+<module>/source/<module>/
+```
+
+Common subareas: `database/`, `projection/`, `replication/`, `workflow/`.
+
+### database/
 
 ```text
 <module>/source/<module>/database/
 ```
 
-This is the main location for PL/SQL, database definitions, service files, views, storage, reports, install scripts, and database-changing scripts.
+Primary area for PL/SQL, database definitions, service files, views, storage, reports, install scripts, and database-changing scripts.
 
-Common extensions:
+Common extensions: `.plsql`, `.plsvc`, `.storage`, `.views`, `.ins`, `.sql`, `.cre`, `.upg`, `.cdb`, `.rdf`, `.apv`.
 
-```text
-.plsql
-.plsvc
-.storage
-.views
-.ins
-.sql
-.cre
-.upg
-.cdb
-.rdf
-.apv
-```
+Examples: `order/source/order/database/CustomerOrder.plsql`, `order/source/order/database/CustomerOrder.views`, `order/source/order/database/CustomerOrdersHandling.plsvc`.
 
-Representative examples:
+Notes: `.upg` and `.cdb` are database scripts; `.rdf` is report-related; subfolders such as `BIServices/` can appear under `database/`.
+
+### projection/
 
 ```text
-order/source/order/database/CustomerOrder.plsql
-order/source/order/database/CustomerOrder.storage
-order/source/order/database/CustomerOrder.views
-order/source/order/database/CustomerOrdersHandling.plsvc
+<module>/source/<module>/projection/
+<module>/source/<module>/projection/packages/<ProjectionName>/...
 ```
 
-`.upg` and `.cdb` files are important database scripts. They may modify database structure or data and should not be dismissed as irrelevant when the user's question involves database changes, upgrades, support updates, or data model evolution.
+`.projection` model files usually live under:
 
-`.rdf` files are related to operational reports and commonly appear under `source/<module>/database/`.
+```text
+<module>/model/<module>/
+```
 
-The `database/` area may also contain secondary subfolders. For example, `BIServices/` can appear under `database/` and is related to PowerBI/BI services.
+They are normally not stored under `source/<module>/projection/`.
 
-## Replication
+`source/<module>/projection/` may contain projection implementation artifacts, commonly under `packages/`. Some integration-oriented projections may have Java code here, but do not assume Java is the default implementation path.
 
-Replication path:
+Example: `order/source/order/projection/packages/CustomerOrdersHandling/com/ifsworld/projection/CustomerOrdersHandlingActionsImpl.java`.
+
+### replication/
 
 ```text
 <module>/source/<module>/replication/
@@ -244,80 +178,42 @@ Replication path:
 
 Common replication-related naming includes `RSP` and `RRP`.
 
-Example pattern:
+Examples: `order/source/order/replication/CustomerOrderRSP.plsql`, `order/source/order/replication/CustomerOrderRRP.plsql`.
 
-```text
-order/source/order/replication/CustomerOrderRSP.plsql
-order/source/order/replication/CustomerOrderRRP.plsql
-```
-
-## Projection Source Implementation
-
-Projection source path:
-
-```text
-<module>/source/<module>/projection/
-```
-
-Important nuance: `.projection` files usually live under:
-
-```text
-<module>/model/<module>/
-```
-
-The `source/<module>/projection/` area may contain generated or hand-written implementation code, commonly under package folders.
-
-Observed pattern:
-
-```text
-<module>/source/<module>/projection/packages/<ProjectionName>/...
-```
-
-Representative Java implementation example:
-
-```text
-order/source/order/projection/packages/CustomerOrdersHandling/com/ifsworld/projection/CustomerOrdersHandlingActionsImpl.java
-```
-
-## Workflow
-
-Workflow path:
+### workflow/
 
 ```text
 <module>/source/<module>/workflow/
-```
-
-Observed substructure:
-
-```text
 <module>/source/<module>/workflow/bpmn/
 ```
 
-## Server Areas
+When present, `bpmn/` is the observed area for workflow/BPMN artifacts, commonly `.bpmn` files.
 
-Server path:
+### Less Common Source Areas
+
+Some modules contain additional source areas:
+
+```text
+<module>/source/<module>/client/
+<module>/source/<module>/webapp/
+<module>/source/<module>/fsmigtool/
+```
+
+These areas are structurally valid but not the usual Marble model or PL/SQL database locations. Examples observed locally include `webapp/` in modules such as `appsrv` and `gisint`, and `fsmigtool/` in `appsrv`. In particular, `.client` model files normally live under `<module>/model/<module>/`, not under `<module>/source/<module>/client/`.
+
+## Server Area
 
 ```text
 <module>/server/
 ```
 
-Primary server areas commonly include reports and lobby assets:
+Common server areas include reports and lobby assets:
 
 ```text
 <module>/server/reports/
 <module>/server/lobby/
-```
-
-Server report subfolders commonly include:
-
-```text
 <module>/server/reports/layouts/
 <module>/server/reports/schemas/
-```
-
-Lobby subfolders commonly include:
-
-```text
 <module>/server/lobby/datasources/
 <module>/server/lobby/elements/
 <module>/server/lobby/pages/
@@ -333,29 +229,24 @@ Secondary server areas can include:
 <module>/server/profiles/
 ```
 
-These secondary areas exist but are not the main Marble or PL/SQL code locations.
+Server areas are structurally valid, but they are not the primary Marble model or PL/SQL database areas.
 
-## Secondary Or Less Common Source Areas
+## Reports Across Areas
 
-Some modules contain additional source areas outside the primary `database/`, `replication/`, `projection/`, and `workflow/` paths.
-
-Observed secondary or less common examples:
+Report-related artifacts can appear in several structural areas:
 
 ```text
-<module>/source/<module>/client/
-<module>/source/<module>/webapp/
-<module>/source/<module>/fsmigtool/
+<module>/model/<module>/*.report
+<module>/source/<module>/database/*.rdf
+<module>/server/reports/layouts/*.rdl
+<module>/server/reports/schemas/*.xsd
 ```
 
-Examples observed locally include `source/<module>/client/` in a small number of modules, `webapp/` in modules such as `appsrv` and `gisint`, and `fsmigtool/` in `appsrv`.
-
-These areas are structurally valid but not the usual Marble or PL/SQL locations.
+`.report` files are model artifacts. `.rdf` files commonly appear under `source/<module>/database/`. `.rdl` and `.xsd` files commonly appear under `server/reports/`.
 
 ## Secondary Areas
 
-The main areas of interest are usually Marble model files and PL/SQL/database code.
-
-Treat these paths as secondary unless the user asks about deployment, build, installation, generated assets, tests, manual deployment, web assets, upgrades, or migration:
+These paths are secondary for normal Marble model and PL/SQL database navigation:
 
 ```text
 build/
@@ -367,17 +258,22 @@ manualdeploy/
 test/
 ```
 
-Do not claim these folders are useless. They are simply not the primary Marble or PL/SQL code locations.
+They may still matter when the user's request involves deployment, build, installation, tests, manual deployment, upgrades, migration, release, support updates, or lifecycle behavior.
 
-Upgrade, migration, release, support-update, and installer scripts may be important when the user's question involves database structure, data changes, deployment, or lifecycle behavior.
+## Canonical Path Summary
 
-## Structural Summary
+Use this summary as a compact reminder of recurring locations, not as an exhaustive inventory.
 
-The primary structural areas are:
+Primary structural areas:
 
 ```text
 <module>/model/<module>/
 <module>/source/<module>/database/
+```
+
+Other recurring structural areas:
+
+```text
 <module>/source/<module>/replication/
 <module>/source/<module>/projection/
 <module>/source/<module>/workflow/
@@ -387,10 +283,8 @@ The primary structural areas are:
 
 This list is a structural map, not a mandatory search workflow.
 
-## Scope Boundary
+## Boundary
 
-This skill describes local folder structure only.
-
-It does not define IFS functional behavior, Marble syntax, PL/SQL conventions, projection semantics, or product documentation rules.
+This skill describes local folder structure only. It does not define IFS functional behavior, Marble syntax, PL/SQL conventions, projection semantics, or product documentation rules.
 
 For concrete implementation guidance, inspect the relevant local files.
